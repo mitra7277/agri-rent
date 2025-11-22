@@ -17,10 +17,14 @@ const app = express();
 // =============================
 app.use(express.json({ limit: "10mb" }));
 
-// ⭐ FIXED CORS 100% working on both 5173 & 5174
+// ⭐ FIXED CORS FOR VERCEL + LOCAL
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://localhost:5174"],
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "https://agri-rent-pink.vercel.app",
+    ],
     credentials: true,
   })
 );
@@ -29,11 +33,17 @@ app.use(
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // =============================
+// ROOT ROUTE FIX ✔
+// =============================
+app.get("/", (req, res) => {
+  res.send("AgriRent Backend Running 🚜🔥");
+});
+
+// =============================
 // ROUTES
 // =============================
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/admin", require("./routes/adminRoutes"));
-
 app.use("/api/machines", require("./routes/machineRoutes"));
 app.use("/api/bookings", require("./routes/bookingRoutes"));
 app.use("/api/reviews", require("./routes/reviewRoutes"));
@@ -42,23 +52,20 @@ app.use("/api/wallet", require("./routes/walletRoutes"));
 app.use("/api/payments", require("./routes/paymentRoutes"));
 app.use("/api/equipment", require("./routes/equipmentRoutes"));
 app.use("/api/calendar", require("./routes/calendarRoutes"));
-
-// FIX 👉 NO DUPLICATE ROUTE
 app.use("/api/owner-analytics", require("./routes/ownerAnalyticsRoutes"));
 
-// Root
-app.get("/", (req, res) => {
-  res.send("Agri-Rent API running 🚜🔥");
-});
-
 // =============================
-// SOCKET.IO (CORS FIXED)
+// SOCKET.IO
 // =============================
 const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:5173", "http://localhost:5174"],
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "https://agri-rent-pink.vercel.app"
+    ],
     methods: ["GET", "POST"],
   },
 });
@@ -75,4 +82,6 @@ io.on("connection", (socket) => {
 // START SERVER
 // =============================
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => console.log(`🚀 Server running on ${PORT}`));
+server.listen(PORT, () =>
+  console.log(`🚀 Server running on ${PORT}`)
+);
